@@ -1,5 +1,5 @@
 # import the neccessary modules
-from flask import Flask, jsonify, request, redirect, url_for
+from flask import Flask, jsonify, request, redirect, url_for, json
 from flask_cors import CORS
 
 # Create an app instance
@@ -82,6 +82,36 @@ def read():
         "status": "success",
         "students": students_list
     })
+
+@app.route('/read/<student_id>')
+def readId(student_id):
+    # 1. connect database
+    database = sqlite3.connect('data.sqlite')
+    # 2. make query to fetch all information in the database
+    read_all = """SELECT * FROM student"""
+    # 3. exceute
+    read_all_execute = database.execute(read_all)
+    # 4. fetchall
+    fetch_data = read_all_execute.fetchall()
+    
+    #conver the fetched data to a list of dictionaries
+    students_list = []
+    for student in fetch_data:
+        students_list.append({ 
+            'id': student[0], 
+            'first name': student[1], 
+            'last name': student[2], 
+            'age': student[3], 
+            'gender': student[4]
+        })
+    # 5. convert the informaion to json format and return
+    for i in range(len(students_list)):
+        if students_list[i]['id'] == int(student_id):
+            return jsonify({
+                "status": "success",
+                "students": students_list[i]
+            })
+    return('cool')
 
 # Run the app
 if __name__ == '__main__':
